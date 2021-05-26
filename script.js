@@ -34,6 +34,7 @@ function getAnime(name) {
       }
     coverImage {
       extraLarge
+      color
     }
     description
       
@@ -79,13 +80,14 @@ function useResults(result) {
     }
     var coverImage = result.data.Media.coverImage.extraLarge;
     var description = result.data.Media.description;
+    var clr = result.data.Media.coverImage.color;
     console.log(title);
     console.log(coverImage);
     console.log(description);
 
     txt.value = "";
     removeCurrentCard();
-    addCard(title, coverImage, description);
+    addCard(title, coverImage, description, clr);
   }
 }
 
@@ -97,7 +99,7 @@ function removeCurrentCard() {
   }
 }
 
-function addCard(title, image, desc) {
+function addCard(title, image, desc, clr) {
   const card = document.createElement("div");
   card.setAttribute("class", "card");
   const imga = document.createElement("img");
@@ -116,4 +118,6 @@ function addCard(title, image, desc) {
   card.appendChild(cardInfo);
 
   container.appendChild(card);
+
+  document.body.style.backgroundColor = clr;
 }
