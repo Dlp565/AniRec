@@ -32,6 +32,7 @@ function getReccomendation(name) {
 
   //temporary fixed example
 
+  /*
   const title = document.createElement("div");
   title.setAttribute("class", "rec-title");
   const titleh1 = document.createElement("h1");
@@ -65,15 +66,19 @@ function getReccomendation(name) {
   reccontainer.appendChild(card2);
   reccontainer.appendChild(card);
 
-  /* fill in here 
-      {
-    Media(search:"title") {
-      recommendations {
+  */
+
+  var query = `
+   query($search: String) {
+      Media(search:$search,type:ANIME){
+    	recommendations {
         edges {
           node {
             mediaRecommendation {
               title{
                 english
+                romaji
+                native
               }
               coverImage {
                 extraLarge
@@ -82,14 +87,69 @@ function getReccomendation(name) {
           }
         }
       }
-    }
-  }
-  */
+    }  
+   }`;
+
+  var variables = {
+    search: name,
+  };
+
+  var url = "https://graphql.anilist.co",
+    options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        query: query,
+        variables: variables,
+      }),
+    };
+
+  fetch(url, options)
+    .then((res) => res.json())
+    .then((result) => displayReccomedations(result, reccontainer))
+    .catch((error) => console.log(error));
 
   //)
 
   //add event listener to all the cards
+}
 
+function displayReccomedations(result, reccontainer) {
+  console.log(result);
+  var recs = result.data.Media.recommendations.edges;
+  if (result.data == null || recs.length == 0) {
+    const title = document.createElement("div");
+    title.setAttribute("class", "rec-title");
+    const titleh1 = document.createElement("h1");
+    titleh1.innerHTML = "Sorry There Were No Reccomendations Found";
+    title.appendChild(titleh1);
+    reccontainer.appendChild(title);
+  } else {
+    for (var i = 0; i < recs.length; i++) {
+      currRec = recs[i].node.mediaRecommendation;
+      var card = document.createElement("div");
+      card.setAttribute("class", "rec-card");
+      var h3e = document.createElement("h3");
+      h3e.setAttribute("class", "rec-name");
+      var currtitle = currRec.title.english;
+      if (currtitle == null) {
+        currtitle = currRec.title.romaji;
+      }
+
+      if (currtitle == null) {
+        currtitle = currRec.title.native;
+      }
+      h3e.innerHTML = currtitle;
+      var imge = document.createElement("img");
+      imge.src = currRec.coverImage.extraLarge;
+      card.appendChild(imge);
+      card.appendChild(h3e);
+      reccontainer.appendChild(card);
+    }
+  }
   recListener();
 }
 
