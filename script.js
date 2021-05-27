@@ -124,10 +124,16 @@ function displayReccomedations(result, reccontainer) {
     const title = document.createElement("div");
     title.setAttribute("class", "rec-title");
     const titleh1 = document.createElement("h1");
-    titleh1.innerHTML = "Sorry There Were No Reccomendations Found";
+    titleh1.innerHTML = "Sorry There Were No Recommendations Found";
     title.appendChild(titleh1);
     reccontainer.appendChild(title);
   } else {
+    const title = document.createElement("div");
+    title.setAttribute("class", "rec-title");
+    const titleh1 = document.createElement("h1");
+    titleh1.innerHTML = "Recommendations:";
+    title.appendChild(titleh1);
+    reccontainer.appendChild(title);
     for (var i = 0; i < recs.length; i++) {
       currRec = recs[i].node.mediaRecommendation;
       var card = document.createElement("div");
