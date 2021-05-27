@@ -181,6 +181,9 @@ enter.addEventListener("click", function (event) {
 
 function getAnime(name) {
   //make api request
+  if (name.includes("&")) {
+    name.replace("&", "and");
+  }
   var query = `
    query($search: String) {
       Media(search:$search,type:ANIME){
