@@ -1,22 +1,143 @@
 var txt = document.getElementById("input");
 var enter = document.getElementById("enter");
-var container = document.getElementById("container");
-var cards = document.getElementsByClassName("rec-card");
-txt.focus();
-function recListener() {
-  var cards = document.getElementsByClassName("rec-card");
-  for (var i = 0; i < cards.length; i++) {
-    cards[i].addEventListener("click", function (event) {
-      var currElement = event.target;
-      //if(currElement.className)
-      if (currElement.className != "rec-card") {
-        currElement = currElement.parentElement;
-      }
 
-      getAnime(currElement.getElementsByClassName("rec-name")[0].innerHTML);
-    });
+txt.focus();
+
+txt.addEventListener("keydown", function (event) {
+  if (event.code == "Enter") {
+    var search = txt.value;
+
+    if (search == "") {
+      alert("Please enter a valid name!");
+    } else {
+      window.open(`./search.html?search=${search}`, "_self");
+    }
+  }
+});
+
+enter.addEventListener("click", function (event) {
+  var search = txt.value;
+
+  if (search == "") {
+    alert("Please enter a valid name!");
+  } else {
+    window.open(`./search.html?search=${search}`, "_self");
+  }
+});
+
+//get search value from query
+
+function getParameterByName(name, url = window.location.href) {
+  name = name.replace(/[\[\]]/g, "\\$&");
+  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return "";
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+var search = getParameterByName("search");
+console.log(search);
+
+//load anime info part
+
+function getAnime(name) {
+  //make api request
+  if (name.includes("&")) {
+    name.replace("&", "and");
+  }
+  var query = `
+   query($search: String) {
+      Media(search:$search,type:ANIME){
+    	title{
+        english
+        romaji
+        native
+      }
+    coverImage {
+      extraLarge
+      color
+    }
+    description
+      
+   }
+}
+   
+   `;
+
+  var variables = {
+    search: name,
+  };
+
+  var url = "https://graphql.anilist.co",
+    options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        query: query,
+        variables: variables,
+      }),
+    };
+
+  fetch(url, options)
+    .then((res) => res.json())
+    .then((result) => useResults(result))
+    .catch((error) => console.log(error));
+}
+
+function useResults(result) {
+  if (result.data.Media == null || result.data == null) {
+    alert("Anime could not be found");
+    txt.value = "";
+  } else {
+    var title = result.data.Media.title.english;
+    if (title == null) {
+      title = result.data.Media.title.romaji;
+    }
+    if (title == null) {
+      title = result.data.Media.title.native;
+    }
+
+    var coverImage = result.data.Media.coverImage.extraLarge;
+    var description = result.data.Media.description;
+    var clr = result.data.Media.coverImage.color;
+
+    txt.value = "";
+
+    addCard(title, coverImage, description, clr);
+
+    getReccomendation(title);
   }
 }
+
+function addCard(title, image, desc, clr) {
+  const card = document.createElement("div");
+  card.setAttribute("class", "card");
+  const imga = document.createElement("img");
+  imga.src = image;
+  card.appendChild(imga);
+
+  const cardInfo = document.createElement("div");
+  cardInfo.setAttribute("class", "card-info");
+  //h1 and p
+  const h1 = document.createElement("h1");
+  h1.innerHTML = title;
+  const p = document.createElement("p");
+  p.innerHTML = desc;
+  cardInfo.appendChild(h1);
+  cardInfo.appendChild(p);
+  card.appendChild(cardInfo);
+
+  container.appendChild(card);
+
+  document.body.style.backgroundColor = clr;
+}
+getAnime(search);
+
+//load reccomendations
 
 function getReccomendation(name) {
   //if reccomendations div  has no children add div (class rec-title) that containes Header that says Reccomended:
@@ -159,125 +280,18 @@ function displayReccomedations(result, reccontainer) {
   recListener();
 }
 
-txt.addEventListener("keydown", function (event) {
-  if (event.code == "Enter") {
-    var search = txt.value;
-    if (search == "") {
-      alert("Please enter a valid name!");
-    } else {
-      window.open(`./search.html?search=${search}`, "_self");
-    }
-  }
-});
-
-enter.addEventListener("click", function (event) {
-  var search = txt.value;
-  if (search == "") {
-    alert("Please enter a valid name!");
-  } else {
-    window.open(`./search.html?search=${search}`, "_self");
-  }
-});
-
-function getAnime(name) {
-  //make api request
-  if (name.includes("&")) {
-    name.replace("&", "and");
-  }
-  var query = `
-   query($search: String) {
-      Media(search:$search,type:ANIME){
-    	title{
-        english
-        romaji
-        native
+function recListener() {
+  var cards = document.getElementsByClassName("rec-card");
+  for (var i = 0; i < cards.length; i++) {
+    cards[i].addEventListener("click", function (event) {
+      var currElement = event.target;
+      //if(currElement.className)
+      if (currElement.className != "rec-card") {
+        currElement = currElement.parentElement;
       }
-    coverImage {
-      extraLarge
-      color
-    }
-    description
-      
-   }
-}
-   
-   `;
 
-  var variables = {
-    search: name,
-  };
-
-  var url = "https://graphql.anilist.co",
-    options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        query: query,
-        variables: variables,
-      }),
-    };
-
-  fetch(url, options)
-    .then((res) => res.json())
-    .then((result) => useResults(result))
-    .catch((error) => console.log(error));
-}
-
-function useResults(result) {
-  if (result.data.Media == null || result.data == null) {
-    alert("Anime could not be found");
-    txt.value = "";
-  } else {
-    var title = result.data.Media.title.english;
-    if (title == null) {
-      title = result.data.Media.title.romaji;
-    }
-    if (title == null) {
-      title = result.data.Media.title.native;
-    }
-
-    var coverImage = result.data.Media.coverImage.extraLarge;
-    var description = result.data.Media.description;
-    var clr = result.data.Media.coverImage.color;
-
-    txt.value = "";
-    removeCurrentCard();
-    addCard(title, coverImage, description, clr);
-
-    getReccomendation(title);
+      var title = currElement.getElementsByClassName("rec-name")[0].innerHTML;
+      window.open(`./search.html?search=${title}`, "_self");
+    });
   }
-}
-
-function removeCurrentCard() {
-  if (container.childElementCount != 0) {
-    while (container.lastChild) {
-      container.removeChild(container.lastChild);
-    }
-  }
-}
-
-function addCard(title, image, desc, clr) {
-  const card = document.createElement("div");
-  card.setAttribute("class", "card");
-  const imga = document.createElement("img");
-  imga.src = image;
-  card.appendChild(imga);
-
-  const cardInfo = document.createElement("div");
-  cardInfo.setAttribute("class", "card-info");
-  //h1 and p
-  const h1 = document.createElement("h1");
-  h1.innerHTML = title;
-  const p = document.createElement("p");
-  p.innerHTML = desc;
-  cardInfo.appendChild(h1);
-  cardInfo.appendChild(p);
-  card.appendChild(cardInfo);
-
-  container.appendChild(card);
-
-  document.body.style.backgroundColor = clr;
 }
