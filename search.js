@@ -90,8 +90,9 @@ function getAnime(name) {
 
 function useResults(result) {
   if (result.data.Media == null || result.data == null) {
-    alert("Anime could not be found");
     txt.value = "";
+    window.history.back();
+    alert("Anime could not be found");
   } else {
     var title = result.data.Media.title.english;
     if (title == null) {

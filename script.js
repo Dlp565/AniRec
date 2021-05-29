@@ -230,6 +230,8 @@ function useResults(result) {
   if (result.data.Media == null || result.data == null) {
     alert("Anime could not be found");
     txt.value = "";
+
+    console.log("err");
   } else {
     var title = result.data.Media.title.english;
     if (title == null) {
