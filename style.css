@@ -79,18 +79,25 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-items: center;
-  padding: 5px;
+  justify-content: center;
+
   width: 20vw;
+  height: 45vh;
+
   text-align: center;
   background-color: white;
-  min-width: 200px;
+  min-width: 250px;
   max-width: 300px;
+  max-height: 540px;
+  min-height: 450px;
 }
 
 .rec-card img {
   width: 15vw;
+  height: 35vh;
   min-width: 150px;
   max-width: 225px;
+  max-height: 375px;
+  min-height: 250px;
   border: saddlebrown solid;
 }
